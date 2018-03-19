@@ -29,7 +29,6 @@ UNREAD_LABEL = 'UNREAD'
 PRINT_LABEL = 'Label_5'
 USERID = 'me'
 MAILPRINT_FOLDER = '/tmp/mailprint'
-PRINTER_NAME = 'Brother_DCP-7065DN'
 
 
 def get_credentials():
@@ -134,7 +133,7 @@ def main():
                 with open(path, 'wb+') as fsock:
                     fsock.write(file_data)
 
-                cmd = ['lp', '-d {}'.format(PRINTER_NAME), path]
+                cmd = ['lp', path]
                 subprocess.call(cmd, stderr=subprocess.STDOUT)
 
                 time.sleep(5)
