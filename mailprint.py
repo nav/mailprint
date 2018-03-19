@@ -1,10 +1,10 @@
 from __future__ import print_function
 
 # Adapted from https://developers.google.com/gmail/api/quickstart/python
-import base64
-
-import httplib2
 import os
+import base64
+import httplib2
+import time
 
 from apiclient import discovery
 from googleapiclient import errors
@@ -27,6 +27,8 @@ APPLICATION_NAME = 'MailPrint Client'
 UNREAD_LABEL = 'UNREAD'
 PRINT_LABEL = 'Label_5'
 USERID = 'me'
+MAILPRINT_FOLDER = '/tmp/mailprint'
+PRINTER_NAME = 'Brother_DCP-7065DN'
 
 
 def get_credentials():
@@ -42,8 +44,7 @@ def get_credentials():
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
-    credential_path = os.path.join(credential_dir,
-                                   'gmail-python-quickstart.json')
+    credential_path = os.path.join(credential_dir, 'mailprint.json')
 
     store = Storage(credential_path)
     credentials = store.get()
@@ -104,6 +105,9 @@ def main():
     if not messages:
         return 'No messages found.'
 
+    if not os.path.exists(MAILPRINT_FOLDER):
+        os.makedirs(MAILPRINT_FOLDER)
+
     for msg in messages:
         try:
             message = get_message(service, msg['id'])
@@ -124,11 +128,16 @@ def main():
 
                 file_data = base64.urlsafe_b64decode(attachment['data']
                                                      .encode('UTF-8'))
-                path = ''.join(['/tmp/', part['filename']])
 
-                f = open(path, 'wb+')
-                f.write(file_data)
-                f.close()
+                path = os.path.join('/', MAILPRINT_FOLDER, part['filename'])
+                with open(path, 'wb+') as fsock:
+                    fsock.write(file_data)
+
+                cmd = ['lp', '-d {}'.format(PRINTER_NAME), path]
+                os.subprocess.call(cmd, stderr=os.subprocess.STDOUT)
+
+                time.sleep(5)
+
         except errors.HttpError as error:
             return 'An error occurred: %s' % error
 
