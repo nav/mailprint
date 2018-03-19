@@ -5,6 +5,7 @@ import os
 import base64
 import httplib2
 import time
+import subprocess
 
 from apiclient import discovery
 from googleapiclient import errors
@@ -134,7 +135,7 @@ def main():
                     fsock.write(file_data)
 
                 cmd = ['lp', '-d {}'.format(PRINTER_NAME), path]
-                os.subprocess.call(cmd, stderr=os.subprocess.STDOUT)
+                subprocess.call(cmd, stderr=subprocess.STDOUT)
 
                 time.sleep(5)
 
